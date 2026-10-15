@@ -1,0 +1,588 @@
+openapi: 3.0.2
+info:
+  title: OSSERVAPREZZI CARBURANTI
+  x-summary: Consultare in tempo reale i prezzi di vendita dei carburanti
+  x-api-id: 6fbcf843-f45e-468e-a37d-3b1052b1069a
+  version: 2.0.0
+  description: |-
+    ## Osservatorio prezzi carburante (Aggiornato)
+
+    API aggiornate del Ministero per la consultazione in tempo reale dei prezzi di vendita 
+    e dei dettagli degli impianti di distribuzione carburanti sul territorio nazionale.
+  contact:
+    email: osservaprezzi@mise.gov.it
+    name: Portale dell'Osservatorio Carburanti
+    url: https://carburanti.mise.gov.it/OssPrezziSearch/
+  termsOfService: https://carburanti.mise.gov.it/ospzApi/search/zone
+
+servers:
+  - url: https://carburanti.mise.gov.it/ospzApi
+
+paths:
+  /registry/servicearea/{serviceAreaId}:
+    get:
+      summary: Dettagli di un impianto di distribuzione.
+      description: Ritorna le informazioni dettagliate di una stazione di servizio specifica.
+      operationId: getServiceAreaDetail
+      parameters:
+        - name: serviceAreaId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceAreaDetail'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        default:
+          $ref: '#/components/responses/default'
+
+  /registry/highway:
+    get:
+      summary: Elenco delle autostrade italiane.
+      operationId: getHighwaysList
+      responses:
+        '200':
+          description: Successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListResponse'
+        default:
+          $ref: '#/components/responses/default'
+
+  /registry/brands:
+    get:
+      summary: Elenco dei marchi di carburante.
+      operationId: getBrandsList
+      responses:
+        '200':
+          description: Successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListResponse'
+        default:
+          $ref: '#/components/responses/default'
+
+  /registry/alllogos:
+    get:
+      summary: Elenco dei loghi dei marchi.
+      operationId: getBrandsLogosList
+      responses:
+        '200':
+          description: Successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrandsLogosListResponse'
+        default:
+          $ref: '#/components/responses/default'
+
+  /registry/region:
+    get:
+      summary: Elenco delle regioni italiane.
+      operationId: getRegionsList
+      responses:
+        '200':
+          description: Successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListResponse'
+        default:
+          $ref: '#/components/responses/default'
+
+  /registry/province:
+    get:
+      summary: Ricerca le province di una regione.
+      operationId: getProvincesList
+      parameters:
+        - name: regionId
+          in: query
+          required: true
+          schema:
+            type: integer
+          example: 8
+      responses:
+        '200':
+          description: Successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        default:
+          $ref: '#/components/responses/default'
+
+  /registry/town:
+    get:
+      summary: Ricerca i comuni in una provincia.
+      operationId: getTownsList
+      parameters:
+        - name: province
+          in: query
+          required: true
+          schema:
+            type: string
+          example: "MN"
+      responses:
+        '200':
+          description: Successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ListResponse'
+        '400':
+          $ref: '#/components/responses/400BadRequest'
+        default:
+          $ref: '#/components/responses/default'
+
+  /search/zone:
+    post:
+      summary: Ricerca prezzi dei carburanti in base alla zona geografica (coordinate e raggio).
+      operationId: searchByZone
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchByZoneBody'
+        required: true
+      responses:
+        '200':
+          description: Successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceAreaSearchResponse'
+        default:
+          $ref: '#/components/responses/default'
+
+  /search/area:
+    post:
+      summary: Ricerca prezzi dei carburanti per area geografica (Regione, Provincia, Comune).
+      operationId: searchByGeographicArea
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchByGeographicAreaBody'
+        required: true
+      responses:
+        '200':
+          description: Successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceAreaSearchResponse'
+        default:
+          $ref: '#/components/responses/default'
+
+  /search/highway:
+    post:
+      summary: Ricerca prezzi dei carburanti per tratta autostradale.
+      operationId: searchByHighway
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - highwayId
+              properties:
+                highwayId:
+                  type: string
+                  example: "A1"
+        required: true
+      responses:
+        '200':
+          description: Successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceAreaSearchResponse'
+        default:
+          $ref: '#/components/responses/default'
+
+  /search/servicearea:
+    post:
+      summary: Ricerca avanzata per marchio e testo libero.
+      operationId: searchByBrand
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchByBrandBody'
+        required: true
+      responses:
+        '200':
+          description: Successo
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServiceAreaSearchResponse'
+        default:
+          $ref: '#/components/responses/default'
+
+components:
+  responses:
+    400BadRequest:
+      description: Richiesta non valida o parametri mancanti/errati.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+    default:
+      description: Errore generico del server o inatteso.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ApiError'
+
+  schemas:
+    ApiError:
+      type: object
+      required:
+        - timestamp
+        - status
+        - error
+        - message
+        - path
+      properties:
+        timestamp:
+          type: string
+          format: date-time
+          example: "2026-10-15T12:00:00.000Z"
+        status:
+          type: integer
+          example: 400
+        error:
+          type: string
+          example: "Bad Request"
+        message:
+          type: string
+          example: "Required request parameter 'province' is not present"
+        path:
+          type: string
+          example: "/registry/town"
+
+    MapPoint:
+      type: object
+      required:
+        - lat
+        - lng
+      properties:
+        lat:
+          type: number
+          format: double
+        lng:
+          type: number
+          format: double
+
+    BaseSearchBody:
+      type: object
+      properties:
+        fuelType:
+          type: string
+          example: "0"
+        refuelingMode:
+          type: string
+          example: "x"
+        priceOrder:
+          type: string
+          enum: [asc, desc]
+          example: "desc"
+
+    SearchByZoneBody:
+      allOf:
+        - $ref: '#/components/schemas/BaseSearchBody'
+        - type: object
+          required:
+            - points
+          properties:
+            points:
+              type: array
+              items:
+                $ref: '#/components/schemas/MapPoint'
+            radius:
+              type: number
+              example: 5
+
+    SearchByGeographicAreaBody:
+      allOf:
+        - $ref: '#/components/schemas/BaseSearchBody'
+        - type: object
+          required:
+            - region
+          properties:
+            region:
+              type: integer
+              example: 9
+            province:
+              type: string
+              nullable: true
+              example: "LT"
+            town:
+              type: string
+              nullable: true
+              example: "Latina"
+
+    SearchByBrandBody:
+      allOf:
+        - $ref: '#/components/schemas/BaseSearchBody'
+        - type: object
+          properties:
+            region:
+              type: integer
+              example: 9
+            province:
+              type: string
+              nullable: true
+              example: "LT"
+            brand:
+              type: string
+              nullable: true
+              example: "Eni"
+            queryText:
+              type: string
+              nullable: true
+
+    ListItem:
+      type: object
+      required:
+        - id
+        - description
+      properties:
+        id:
+          type: string
+        description:
+          type: string
+
+    ListResponse:
+      type: object
+      required:
+        - results
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ListItem'
+
+    LogoMarker:
+      type: object
+      properties:
+        content:
+          type: string
+        estensione:
+          type: string
+          enum: [png, svg, jpg]
+        tipoFile:
+          type: string
+          enum: [th5, th4, th3, th2, th1, logo]
+
+    BrandLogo:
+      type: object
+      properties:
+        bandiera:
+          type: string
+        bandieraId:
+          type: integer
+        carburantiList:
+          nullable: true
+        isEliminabile:
+          type: boolean
+          nullable: true
+        logoMarkerList:
+          type: array
+          items:
+            $ref: '#/components/schemas/LogoMarker'
+
+    BrandsLogosListResponse:
+      type: object
+      required:
+        - loghi
+      properties:
+        loghi:
+          type: array
+          items:
+            $ref: '#/components/schemas/BrandLogo'
+
+    Fuel:
+      type: object
+      required:
+        - id
+        - price
+        - name
+        - fuelId
+        - isSelf
+      properties:
+        id:
+          type: integer
+        price:
+          type: number
+        name:
+          type: string
+        fuelId:
+          type: integer
+        isSelf:
+          type: boolean
+
+    FuelDetail:
+      allOf:
+        - $ref: '#/components/schemas/Fuel'
+        - type: object
+          required:
+            - serviceAreaId
+            - insertDate
+            - validityDate
+          properties:
+            serviceAreaId:
+              type: integer
+            insertDate:
+              type: string
+              format: date-time
+            validityDate:
+              type: string
+              format: date-time
+
+    OpeningHours:
+      type: object
+      required:
+        - orariAperturaId
+        - giornoSettimanaId
+        - flagOrarioContinuato
+        - flagH24
+        - flagChiusura
+        - flagNonComunicato
+        - flagServito
+        - flagSelf
+      properties:
+        orariAperturaId:
+          type: integer
+        giornoSettimanaId:
+          type: integer
+        oraAperturaMattina:
+          nullable: true
+        oraChiusuraMattina:
+          nullable: true
+        oraAperturaPomeriggio:
+          nullable: true
+        oraChiusuraPomeriggio:
+          nullable: true
+        flagOrarioContinuato:
+          type: boolean
+        oraAperturaOrarioContinuato:
+          nullable: true
+        oraChiusuraOrarioContinuato:
+          nullable: true
+        flagH24:
+          type: boolean
+        flagChiusura:
+          type: boolean
+        flagNonComunicato:
+          type: boolean
+        flagServito:
+          type: boolean
+        flagSelf:
+          type: boolean
+
+    ServiceAreaService:
+      type: object
+      required:
+        - id
+        - description
+      properties:
+        id:
+          type: string
+        description:
+          type: string
+
+    ServiceArea:
+      type: object
+      required:
+        - id
+        - name
+        - fuels
+        - location
+        - insertDate
+        - address
+        - brand
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        fuels:
+          type: array
+          items:
+            $ref: '#/components/schemas/Fuel'
+        location:
+          $ref: '#/components/schemas/MapPoint'
+        insertDate:
+          type: string
+          format: date-time
+        address:
+          type: string
+        brand:
+          type: string
+
+    ServiceAreaDetail:
+      type: object
+      required:
+        - id
+        - name
+        - address
+        - brand
+        - fuels
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        address:
+          type: string
+        brand:
+          type: string
+        fuels:
+          type: array
+          items:
+            $ref: '#/components/schemas/FuelDetail'
+        phoneNumber:
+          type: string
+        email:
+          type: string
+        website:
+          type: string
+        company:
+          type: string
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceAreaService'
+        orariapertura:
+          type: array
+          items:
+            $ref: '#/components/schemas/OpeningHours'
+
+    ServiceAreaSearchResponse:
+      type: object
+      required:
+        - success
+        - center
+        - results
+      properties:
+        success:
+          type: boolean
+        center:
+          $ref: '#/components/schemas/MapPoint'
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/ServiceArea'
